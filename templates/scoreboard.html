@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Live Score</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🏏 Live Match</h1>
+
+        <div id="board"></div>
+
+    </div>
+
+    <script src="/static/app.js"></script>
+    <script>
+        startLiveScoreboard({{ match_id }});
+    </script>
+
+</body>
+
+</html>

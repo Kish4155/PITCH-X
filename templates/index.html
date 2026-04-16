@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Cricket Tracker</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🏏 Cricket Live Tracker</h1>
+        <p style="text-align:center; color:#aaa;">
+            Spotify-style live cricket scoring system
+        </p>
+
+        <div class="card">
+            <h2>Navigation</h2>
+
+            <button onclick="location.href='/admin'">🛠 Admin Panel</button>
+        </div>
+
+        <div class="card">
+            <h2>Open Match</h2>
+
+            <input id="matchId" placeholder="Enter Match ID">
+
+            <button onclick="openMatch()">View Scoreboard</button>
+        </div>
+
+    </div>
+
+    <script>
+        function openMatch() {
+            let id = document.getElementById("matchId").value;
+            if (!id) return alert("Enter Match ID");
+            window.location.href = "/scoreboard/" + id;
+        }
+    </script>
+
+</body>
+
+</html>

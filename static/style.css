@@ -1,0 +1,107 @@
+/* =========================
+   SPOTIFY DARK THEME
+========================= */
+
+body {
+    margin: 0;
+    font-family: "Arial", sans-serif;
+    background: #0a0a0a;
+    color: #ffffff;
+}
+
+/* Layout */
+.container {
+    max-width: 900px;
+    margin: auto;
+    padding: 20px;
+}
+
+/* Headings */
+h1,
+h2,
+h3 {
+    color: #1db954;
+    /* Spotify green */
+    text-align: center;
+}
+
+/* Cards */
+.card,
+.admin-box {
+    background: #121212;
+    border: 1px solid #1f1f1f;
+    border-radius: 14px;
+    padding: 20px;
+    margin: 15px 0;
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* Inputs */
+input {
+    width: 100%;
+    padding: 12px;
+    margin: 8px 0;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: #1e1e1e;
+    color: white;
+}
+
+/* Buttons */
+button {
+    background: #1db954;
+    color: black;
+    font-weight: bold;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 30px;
+    cursor: pointer;
+    margin: 6px 0;
+    width: 100%;
+    transition: 0.2s;
+}
+
+button:hover {
+    background: #18a64a;
+    transform: scale(1.02);
+}
+
+/* Score Display */
+.score {
+    font-size: 40px;
+    font-weight: bold;
+    text-align: center;
+    margin: 15px 0;
+    color: #1db954;
+}
+
+/* Stats Grid */
+.stats {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px;
+}
+
+.stat-box {
+    background: #181818;
+    padding: 12px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid #222;
+}
+
+/* Result */
+.result {
+    text-align: center;
+    font-size: 22px;
+    margin-top: 15px;
+    color: #1db954;
+    font-weight: bold;
+}
+
+/* Links spacing */
+a {
+    color: #1db954;
+    text-decoration: none;
+}

@@ -1,0 +1,15 @@
+{
+  "matches": [
+    {
+      "id": 1,
+      "team1": "India",
+      "team2": "Australia",
+      "target": 180,
+      "current_score": 120,
+      "balls": 92,
+      "crr": 7.89,
+      "rrr": 10.0,
+      "result": "In Progress"
+    }
+  ]
+}

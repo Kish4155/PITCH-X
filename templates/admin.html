@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>🛠 Admin Panel</h1>
+
+        <div class="card">
+            <h2>Create Match</h2>
+
+            <input id="team1" placeholder="Team 1">
+            <input id="team2" placeholder="Team 2">
+            <input id="target" type="number" placeholder="Target">
+
+            <button onclick="createMatch()">Create Match</button>
+        </div>
+
+        <div class="card">
+            <h2>Update Score</h2>
+
+            <input id="matchId" type="number" placeholder="Match ID">
+
+            <button onclick="run0(document.getElementById('matchId').value)">0</button>
+            <button onclick="run1(document.getElementById('matchId').value)">1</button>
+            <button onclick="run2(document.getElementById('matchId').value)">2</button>
+            <button onclick="run4(document.getElementById('matchId').value)">4</button>
+            <button onclick="run6(document.getElementById('matchId').value)">6</button>
+        </div>
+
+        <div class="card">
+            <h2>Open Match</h2>
+
+            <input id="openMatch" type="number" placeholder="Match ID">
+
+            <button onclick="location.href='/scoreboard/' + document.getElementById('openMatch').value">
+                Open Scoreboard
+            </button>
+        </div>
+
+    </div>
+
+    <script src="/static/app.js"></script>
+
+</body>
+
+</html>
