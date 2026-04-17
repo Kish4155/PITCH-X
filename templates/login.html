@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login – Pitch-X</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green:  #00e887;
+            --red:    #ff5a5a;
+            --gold:   #ffc72c;
+            --bg:     #080c10;
+            --border: rgba(255,255,255,0.08);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg);
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        /* Animated background */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 55% 40% at 20% 15%, rgba(232,44,44,0.1) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 35% at 80% 80%, rgba(255,199,44,0.06) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 40% at 60% 30%, rgba(160,10,10,0.05) 0%, transparent 60%);
+            pointer-events: none; z-index: 0;
+            animation: bgShift 12s ease-in-out infinite alternate;
+        }
+        @keyframes bgShift {
+            from { opacity: 0.7; }
+            to   { opacity: 1; }
+        }
+
+        /* Floating cricket balls decoration */
+        .bg-deco {
+            position: fixed; font-size: 6rem; opacity: 0.03;
+            pointer-events: none; z-index: 0; user-select: none;
+            animation: floatDeco 18s ease-in-out infinite;
+        }
+        .bg-deco:nth-child(2) { top: 10%;  left: 5%;  animation-delay: 0s; }
+        .bg-deco:nth-child(3) { top: 75%;  right: 5%; animation-delay: -6s; }
+        .bg-deco:nth-child(4) { top: 40%;  left: 80%; animation-delay: -12s; }
+        @keyframes floatDeco {
+            0%,100% { transform: translateY(0) rotate(0deg); }
+            50%      { transform: translateY(-20px) rotate(15deg); }
+        }
+
+        /* ── CARD ── */
+        .login-card {
+            position: relative; z-index: 1;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 28px;
+            padding: 48px 44px 44px;
+            width: 100%; max-width: 420px;
+            box-shadow: 0 40px 80px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04);
+            animation: slideUp 0.5s cubic-bezier(0.22,1,0.36,1) both;
+            backdrop-filter: blur(20px);
+        }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(30px) scale(0.97); }
+            to   { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        /* Logo / brand */
+        .login-logo {
+            display: flex; align-items: center; gap: 12px;
+            margin-bottom: 8px;
+        }
+        .login-icon {
+            width: 52px; height: 52px; border-radius: 16px;
+            background: linear-gradient(135deg, rgba(232,44,44,0.2), rgba(232,44,44,0.05));
+            border: 1px solid rgba(232,44,44,0.25);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem;
+        }
+        .login-brand-text { font-size: 1.05rem; font-weight: 800; letter-spacing: -0.3px; }
+        .login-brand-sub  { font-size: 0.72rem; color: rgba(255,255,255,0.35); font-weight: 500; margin-top: 1px; }
+
+        .login-title {
+            font-size: 1.7rem; font-weight: 900; letter-spacing: -0.5px;
+            margin-bottom: 4px; margin-top: 28px;
+        }
+        .login-subtitle {
+            font-size: 0.85rem; color: rgba(255,255,255,0.4);
+            margin-bottom: 32px; line-height: 1.5;
+        }
+
+        /* Error banner */
+        .error-banner {
+            background: rgba(255,90,90,0.1);
+            border: 1px solid rgba(255,90,90,0.28);
+            color: var(--red);
+            border-radius: 12px; padding: 12px 16px;
+            font-size: 0.83rem; font-weight: 600;
+            margin-bottom: 20px;
+            display: flex; align-items: center; gap: 8px;
+            animation: shakeX 0.4s ease;
+        }
+        @keyframes shakeX {
+            0%,100% { transform: translateX(0); }
+            20%,60% { transform: translateX(-6px); }
+            40%,80% { transform: translateX(6px); }
+        }
+
+        /* Form fields */
+        .field-group { margin-bottom: 16px; }
+        .field-label {
+            font-size: 0.72rem; font-weight: 700;
+            color: rgba(255,255,255,0.4); text-transform: uppercase;
+            letter-spacing: 1px; margin-bottom: 8px;
+            display: block;
+        }
+        .field-wrap {
+            position: relative;
+        }
+        .field-icon {
+            position: absolute; left: 14px; top: 50%; transform: translateY(-50%);
+            font-size: 1rem; pointer-events: none;
+        }
+        input[type="text"],
+        input[type="password"] {
+            width: 100%;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 14px;
+            color: white;
+            font-size: 0.95rem;
+            font-family: 'Inter', sans-serif;
+            padding: 14px 16px 14px 44px;
+            outline: none;
+            transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+        }
+        input[type="text"]:focus,
+        input[type="password"]:focus {
+            border-color: rgba(232,44,44,0.4);
+            background: rgba(232,44,44,0.04);
+            box-shadow: 0 0 0 3px rgba(232,44,44,0.08);
+        }
+        input::placeholder { color: rgba(255,255,255,0.2); }
+
+        /* Show/hide password toggle */
+        .pwd-toggle {
+            position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+            background: none; border: none; cursor: pointer;
+            color: rgba(255,255,255,0.25); font-size: 1rem;
+            transition: color 0.2s; padding: 0;
+        }
+        .pwd-toggle:hover { color: rgba(255,255,255,0.6); }
+
+        /* Submit button */
+        .btn-login {
+            width: 100%;
+            background: linear-gradient(135deg, #e83030 0%, #c42020 100%);
+            border: none; border-radius: 14px;
+            color: #fff;
+            font-size: 0.95rem; font-weight: 800;
+            font-family: 'Inter', sans-serif;
+            padding: 15px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: opacity 0.2s, transform 0.15s, box-shadow 0.2s;
+            box-shadow: 0 8px 24px rgba(232,44,44,0.3);
+            letter-spacing: 0.2px;
+        }
+        .btn-login:hover {
+            opacity: 0.92;
+            transform: translateY(-1px);
+            box-shadow: 0 12px 32px rgba(232,44,44,0.45);
+        }
+        .btn-login:active { transform: translateY(0); }
+
+        /* Divider */
+        .divider {
+            display: flex; align-items: center; gap: 12px;
+            margin: 24px 0;
+        }
+        .divider-line { flex: 1; height: 1px; background: rgba(255,255,255,0.07); }
+        .divider-text { font-size: 0.72rem; color: rgba(255,255,255,0.2); font-weight: 600; }
+
+        /* Back to live link */
+        .link-live {
+            display: flex; align-items: center; justify-content: center; gap: 8px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.09);
+            border-radius: 14px;
+            color: rgba(255,255,255,0.55);
+            font-size: 0.875rem; font-weight: 600;
+            padding: 13px; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .link-live:hover { background: rgba(255,255,255,0.09); color: white; }
+
+        /* Credentials hint */
+        .cred-hint {
+            text-align: center;
+            margin-top: 20px;
+            font-size: 0.72rem; color: rgba(255,255,255,0.18);
+        }
+
+        @media (max-width: 480px) {
+            .login-card { padding: 32px 24px 28px; margin: 16px; }
+            .login-title { font-size: 1.4rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <span class="bg-deco">🏏</span>
+    <span class="bg-deco">🏏</span>
+    <span class="bg-deco">🏏</span>
+
+    <div class="login-card">
+        <div class="login-logo">
+            <div class="login-icon">🏏</div>
+            <div>
+                <div class="login-brand-text">Pitch-X</div>
+                <div class="login-brand-sub">Admin Portal</div>
+            </div>
+        </div>
+
+        <div class="login-title">Welcome back</div>
+        <div class="login-subtitle">Sign in with your admin credentials to manage matches and scoring.</div>
+
+        {% if error %}
+        <div class="error-banner">
+            ⚠️ {{ error }}
+        </div>
+        {% endif %}
+
+        <form method="POST" action="/login" autocomplete="off">
+            <div class="field-group">
+                <label class="field-label" for="username">Username</label>
+                <div class="field-wrap">
+                    <span class="field-icon">👤</span>
+                    <input
+                        type="text"
+                        id="username"
+                        name="username"
+                        placeholder="Enter admin username"
+                        autocomplete="off"
+                        required
+                    >
+                </div>
+            </div>
+
+            <div class="field-group">
+                <label class="field-label" for="password">Password</label>
+                <div class="field-wrap">
+                    <span class="field-icon">🔒</span>
+                    <input
+                        type="password"
+                        id="password"
+                        name="password"
+                        placeholder="Enter password"
+                        autocomplete="current-password"
+                        required
+                    >
+                    <button type="button" class="pwd-toggle" onclick="togglePwd()" id="pwd-eye" title="Show/hide password">
+                        👁
+                    </button>
+                </div>
+            </div>
+
+            <button type="submit" class="btn-login">🔑 Sign in to Admin Panel</button>
+        </form>
+
+        <div class="divider">
+            <div class="divider-line"></div>
+            <div class="divider-text">or</div>
+            <div class="divider-line"></div>
+        </div>
+
+        <a href="/live" class="link-live">
+            📺 View Live Scores (no login required)
+        </a>
+
+        <div class="cred-hint">Default: admin / cricket123</div>
+    </div>
+
+    <script>
+        function togglePwd() {
+            const input = document.getElementById('password');
+            const eye   = document.getElementById('pwd-eye');
+            if (input.type === 'password') {
+                input.type = 'text';
+                eye.textContent = '🙈';
+            } else {
+                input.type = 'password';
+                eye.textContent = '👁';
+            }
+        }
+
+        // Auto-focus first empty field
+        const u = document.getElementById('username');
+        const p = document.getElementById('password');
+        (u.value ? p : u).focus();
+    </script>
+</body>
+</html>

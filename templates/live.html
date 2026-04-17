@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Scores – Pitch-X</title>
+    <meta name="description" content="Watch live cricket scores and ball-by-ball updates for all active matches.">
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800;900&display=swap');
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', Arial, sans-serif;
+            min-height: 100vh;
+            background: #050206;
+            color: white;
+        }
+
+        /* ──── HEADER ──── */
+        header {
+            width: 100%;
+            background: rgba(255,255,255,0.04);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            padding: 16px 30px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            backdrop-filter: blur(20px);
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.2rem;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .brand span { color: rgba(255,255,255,0.4); }
+
+        .live-badge {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: rgba(232,44,44,0.12);
+            border: 1px solid rgba(232,44,44,0.35);
+            color: #e83030;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border-radius: 50px;
+            padding: 5px 12px;
+        }
+
+        .pulse-dot {
+            width: 7px; height: 7px;
+            border-radius: 50%;
+            background: #e83030;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 0 0 0 rgba(232,44,44,0.7); }
+            50%       { box-shadow: 0 0 0 7px rgba(232,44,44,0); }
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.7);
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+
+        .back-btn:hover {
+            background: rgba(255,255,255,0.12);
+            color: white;
+        }
+
+        /* ──── MAIN ──── */
+        main {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+        }
+
+        .page-title {
+            font-size: 1.8rem;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .page-sub {
+            color: rgba(255,255,255,0.4);
+            font-size: 0.9rem;
+            margin-bottom: 30px;
+        }
+
+        /* ──── MATCH INPUT ──── */
+        .find-match {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 20px 24px;
+            margin-bottom: 30px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .find-match label {
+            font-size: 0.9rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.6);
+            white-space: nowrap;
+        }
+
+        .find-match input {
+            flex: 1;
+            min-width: 120px;
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .find-match input:focus {
+            border-color: rgba(95,255,170,0.5);
+        }
+
+        .find-match input::placeholder { color: rgba(255,255,255,0.3); }
+
+        .btn-watch {
+            background: linear-gradient(135deg, #00c864, #009940);
+            color: white;
+            border: none;
+            padding: 10px 22px;
+            border-radius: 10px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            white-space: nowrap;
+            transition: filter 0.2s, transform 0.2s;
+        }
+
+        .btn-watch:hover { filter: brightness(1.15); transform: translateY(-1px); }
+
+        /* ──── MATCH CARDS ──── */
+        #matches-container {
+            display: flex;
+            flex-direction: column;
+            gap: 18px;
+        }
+
+        .match-card {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 18px;
+            padding: 24px 28px;
+            cursor: pointer;
+            text-decoration: none;
+            color: white;
+            display: block;
+            transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s;
+            animation: fadeUp 0.4s ease both;
+        }
+
+        .match-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(232,44,44,0.3);
+            box-shadow: 0 16px 50px rgba(0,0,0,0.4);
+        }
+
+        @keyframes fadeUp {
+            from { opacity:0; transform: translateY(14px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+
+        .mc-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .mc-teams {
+            font-size: 1.2rem;
+            font-weight: 800;
+        }
+
+        .mc-result {
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 4px 12px;
+            border-radius: 50px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .result-live {
+            background: rgba(232,44,44,0.12);
+            border: 1px solid rgba(232,44,44,0.3);
+            color: #e83030;
+        }
+
+        .result-won {
+            background: rgba(255,200,0,0.12);
+            border: 1px solid rgba(255,200,0,0.25);
+            color: #ffc800;
+        }
+
+        .mc-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 12px;
+        }
+
+        .stat-item {
+            background: rgba(255,255,255,0.05);
+            border-radius: 10px;
+            padding: 10px 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: rgba(255,255,255,0.4);
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+        }
+
+        .stat-value {
+            font-size: 1.15rem;
+            font-weight: 800;
+            color: #ffffff;
+        }
+
+        .stat-value.green { color: #e83030; }
+        .stat-value.red   { color: #ff6b6b; }
+
+        .mc-view-btn {
+            margin-top: 16px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            font-size: 0.82rem;
+            font-weight: 700;
+            color: #e83030;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+        }
+
+        .match-card:hover .mc-view-btn { opacity: 1; }
+
+        /* ──── EMPTY STATE ──── */
+        #empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: rgba(255,255,255,0.3);
+            display: none;
+        }
+
+        #empty-state .empty-icon { font-size: 3rem; margin-bottom: 12px; }
+        #empty-state p { font-size: 1rem; }
+
+        /* ──── LOADING ──── */
+        #loading {
+            text-align: center;
+            padding: 40px;
+            color: rgba(255,255,255,0.3);
+            font-size: 0.95rem;
+        }
+
+        .spinner {
+            display: inline-block;
+            width: 22px; height: 22px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: #e83030;
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+            .find-match { flex-direction: column; }
+            .find-match input { width: 100%; }
+            .btn-watch { width: 100%; }
+            .mc-teams { font-size: 1rem; }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <a href="/" style="text-decoration:none;color:inherit"><div class="brand">🏏 Pitch-X</div></a>
+        <div class="live-badge"><div class="pulse-dot"></div> Live</div>
+        <a href="/" class="back-btn">← Home</a>
+    </header>
+
+    <main>
+        <h1 class="page-title">Live Scores</h1>
+        <p class="page-sub">Auto-refreshing every 5 seconds &nbsp;•&nbsp; Click any match for details</p>
+
+        <!-- Team name search -->
+        <div class="find-match">
+            <label>🔍 Search teams:</label>
+            <input id="searchTeam" type="text" placeholder="Type a team name…" oninput="filterMatches()" autocomplete="off">
+        </div>
+
+        <!-- Match list -->
+        <div id="loading"><span class="spinner"></span> Loading matches…</div>
+        <div id="matches-container"></div>
+        <div id="empty-state">
+            <div class="empty-icon">🏟️</div>
+            <p id="empty-msg">No matches at this moment.</p>
+        </div>
+    </main>
+
+    <script>
+        // ── All fetched matches (raw) ──
+        let allMatches = [];
+
+        function filterMatches() {
+            const q = (document.getElementById('searchTeam').value || '').toLowerCase().trim();
+            const container = document.getElementById('matches-container');
+            const empty     = document.getElementById('empty-state');
+            const emptyMsg  = document.getElementById('empty-msg');
+
+            const filtered = allMatches.filter(m =>
+                m.team1.toLowerCase().includes(q) ||
+                m.team2.toLowerCase().includes(q)
+            );
+
+            if (!filtered.length) {
+                container.innerHTML = '';
+                emptyMsg.textContent = q ? `No matches found for "${q}".` : 'No matches at this moment.';
+                empty.style.display = 'block';
+            } else {
+                empty.style.display = 'none';
+                renderCards(filtered);
+            }
+        }
+
+        function resultClass(result) {
+            if (!result || result === 'Live') return 'result-live';
+            return 'result-won';
+        }
+
+        function renderMatches(data) {
+            document.getElementById('loading').style.display = 'none';
+            allMatches = data.matches || [];
+            filterMatches();
+        }
+
+        function renderCards(matches) {
+            const container = document.getElementById('matches-container');
+
+            matches.forEach((m, idx) => {
+                let card = document.getElementById('mc-' + m.id);
+                const overs  = Math.floor(m.balls / 6) + '.' + (m.balls % 6);
+                const isLive = m.result === 'Live';
+
+                const html = `
+                    <div class="mc-header">
+                        <div class="mc-teams">${m.team1} <span style="color:rgba(255,255,255,0.3)">vs</span> ${m.team2}</div>
+                        <div class="mc-result ${resultClass(m.result)}">${m.result}</div>
+                    </div>
+                    <div class="mc-stats">
+                        <div class="stat-item">
+                            <span class="stat-label">Score</span>
+                            <span class="stat-value">${m.current_score}/${m.wickets ?? ''}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Target</span>
+                            <span class="stat-value">${m.target || '—'}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">Overs</span>
+                            <span class="stat-value">${overs}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">CRR</span>
+                            <span class="stat-value green">${m.crr}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">RRR</span>
+                            <span class="stat-value red">${m.rrr}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span class="stat-label">4s / 6s</span>
+                            <span class="stat-value">${m.fours} / ${m.sixes}</span>
+                        </div>
+                    </div>
+                    <div class="mc-view-btn">📊 View Full Details &amp; Commentary →</div>
+                `;
+
+                if (card) {
+                    card.innerHTML = html;
+                } else {
+                    card = document.createElement('a');
+                    card.id = 'mc-' + m.id;
+                    card.className = 'match-card';
+                    card.href = '/match_details/' + m.id;
+                    card.style.animationDelay = (idx * 0.06) + 's';
+                    card.innerHTML = html;
+                    container.appendChild(card);
+                }
+            });
+
+            // Remove cards no longer in filtered set
+            const currentIds = matches.map(m => 'mc-' + m.id);
+            container.querySelectorAll('.match-card').forEach(c => {
+                if (!currentIds.includes(c.id)) c.remove();
+            });
+        }
+
+        async function fetchMatches() {
+            try {
+                const res = await fetch('/matches');
+                const data = await res.json();
+                renderMatches(data);
+            } catch (e) {
+                console.error(e);
+                document.getElementById('loading').innerHTML = '⚠️ Could not load matches.';
+            }
+        }
+
+        fetchMatches();
+        setInterval(fetchMatches, 5000);
+    </script>
+
+</body>
+</html>

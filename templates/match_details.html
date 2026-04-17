@@ -1,0 +1,1005 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Match Details – Pitch-X</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green:  #e83030;
+            --red:    #ff7070;
+            --gold:   #ffc72c;
+            --blue:   #ffaa40;
+            --purple: #ffc72c;
+            --orange: #ffc72c;
+            --bg:     #050206;
+            --border: rgba(255,255,255,0.07);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 15% 10%, rgba(232,44,44,0.09) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 35% at 85% 80%, rgba(255,199,44,0.06) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 30% at 50% 45%, rgba(160,10,10,0.05) 0%, transparent 60%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 28px;
+            background: rgba(8,12,16,0.88);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(24px);
+        }
+        .brand { display: flex; align-items: center; gap: 10px; font-size: 1rem; font-weight: 800; }
+        .live-badge {
+            display: flex; align-items: center; gap: 7px;
+            background: rgba(232,44,44,0.12); border: 1px solid rgba(232,44,44,0.35);
+            color: var(--green); font-size: 0.7rem; font-weight: 800;
+            padding: 5px 14px; border-radius: 50px; letter-spacing: 1.5px; text-transform: uppercase;
+        }
+        .pulse-dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(232,44,44,0.7); }
+            50%      { box-shadow: 0 0 0 8px rgba(232,44,44,0); }
+        }
+        .back-btn {
+            background: rgba(255,255,255,0.06); border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.65); padding: 8px 20px; border-radius: 50px;
+            font-size: 0.82rem; font-weight: 600; cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.12); color: white; }
+
+        /* ── MAIN ── */
+        main {
+            position: relative; z-index: 1;
+            max-width: 860px; margin: 0 auto; padding: 36px 20px 80px;
+        }
+
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(18px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ── SUMMARY CARD ── */
+        .summary-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px; padding: 28px 32px 24px;
+            margin-bottom: 24px;
+            animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both;
+            position: relative; overflow: hidden;
+        }
+        .summary-card::before {
+            content: '🏏';
+            position: absolute; right: 24px; top: 20px;
+            font-size: 5.5rem; opacity: 0.05;
+            pointer-events: none; transform: rotate(-15deg);
+        }
+
+        .match-teams { display: flex; align-items: center; gap: 14px; margin-bottom: 10px; flex-wrap: wrap; }
+        .team-nm { font-size: 1.5rem; font-weight: 900; letter-spacing: -0.5px; }
+        .vs-chip {
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.3); font-size: 0.68rem; font-weight: 700;
+            padding: 3px 12px; border-radius: 50px; letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        .meta-pills { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+        .mpill {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.4); font-size: 0.7rem; font-weight: 600;
+            padding: 4px 12px; border-radius: 50px; letter-spacing: 0.4px;
+        }
+        .mpill.gold  { color: var(--gold);  border-color: rgba(255,199,44,0.22); background: rgba(255,199,44,0.05); }
+        .mpill.green { color: var(--green); border-color: rgba(232,44,44,0.25);  background: rgba(232,44,44,0.06); }
+        .mpill.blue  { color: var(--blue);  border-color: rgba(255,170,64,0.25); background: rgba(255,170,64,0.06); }
+
+        .hero-score-row { display: flex; align-items: flex-end; gap: 20px; margin-bottom: 20px; flex-wrap: wrap; }
+        .hero-score {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5rem; line-height: 1; letter-spacing: 2px;
+            background: linear-gradient(135deg, #fff 40%, rgba(255,255,255,0.45));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .hero-target { padding-bottom: 10px; }
+        .ht-label { font-size: 0.62rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1px; font-weight: 700; }
+        .ht-val   { font-size: 1.8rem; font-weight: 900; color: rgba(255,255,255,0.45); letter-spacing: -1px; }
+
+        .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(86px, 1fr)); gap: 10px; margin-bottom: 16px; }
+        .sbox {
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px; padding: 13px 12px;
+            display: flex; flex-direction: column; gap: 5px;
+            transition: all 0.2s;
+        }
+        .sbox:hover { background: rgba(255,255,255,0.08); }
+        .sbox.green { border-color: rgba(232,44,44,0.25);  background: rgba(232,44,44,0.05); }
+        .sbox.red   { border-color: rgba(255,120,120,0.2); background: rgba(255,120,120,0.04); }
+        .sbox.gold  { border-color: rgba(255,199,44,0.2);  background: rgba(255,199,44,0.04); }
+        .slabel { font-size: 0.6rem; font-weight: 700; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 1.2px; }
+        .sval   { font-size: 1.3rem; font-weight: 900; letter-spacing: -0.5px; line-height: 1; }
+        .sval.green  { color: var(--green); }
+        .sval.red    { color: var(--red); }
+        .sval.gold   { color: var(--gold); }
+        .sval.blue   { color: var(--blue); }
+
+        .status-bar {
+            padding: 12px 18px; border-radius: 12px; font-size: 0.9rem; font-weight: 800;
+            text-align: center; letter-spacing: 0.3px;
+        }
+        .st-live { background: rgba(232,44,44,0.08);   border: 1px solid rgba(232,44,44,0.28);   color: var(--green); }
+        .st-rain { background: rgba(255,170,64,0.07);  border: 1px solid rgba(255,170,64,0.22);  color: var(--blue); }
+        .st-aban { background: rgba(255,90,90,0.07);  border: 1px solid rgba(255,90,90,0.22);   color: var(--red); }
+        .st-won  { background: rgba(255,199,44,0.07); border: 1px solid rgba(255,199,44,0.22);  color: var(--gold); }
+
+        /* ── COMMENTARY HEADER ── */
+        .comm-hdr {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 18px;
+        }
+        .comm-title { font-size: 1rem; font-weight: 800; }
+        .comm-count {
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.4); font-size: 0.7rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 50px;
+        }
+
+        /* ── OVER SEPARATOR ── */
+        .over-sep { display: flex; align-items: center; gap: 10px; margin: 20px 0 10px; }
+        .over-sep-line { flex: 1; height: 1px; background: rgba(255,255,255,0.06); }
+        .over-sep-label {
+            font-size: 0.62rem; font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+            color: rgba(255,255,255,0.22);
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+            padding: 3px 12px; border-radius: 50px; white-space: nowrap;
+        }
+
+        /* ── BALL CARD ── */
+        .ball-card {
+            display: flex; align-items: flex-start; gap: 14px;
+            background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 16px; padding: 14px 16px; margin-bottom: 8px;
+            transition: background 0.2s, border-color 0.2s;
+        }
+        .ball-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(255,255,255,0.11); }
+        .ball-card.card-four   { border-color: rgba(255,199,44,0.22);  background: rgba(255,199,44,0.03); }
+        .ball-card.card-six    { border-color: rgba(180,100,255,0.28); background: rgba(180,100,255,0.05); }
+        .ball-card.card-wicket { border-color: rgba(255,60,60,0.28);   background: rgba(255,60,60,0.04); }
+
+        /* Run circle */
+        .run-circle {
+            width: 44px; height: 44px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: 900; font-size: 1rem; flex-shrink: 0; line-height: 1;
+        }
+        .rc-0  { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); color: rgba(255,255,255,0.3); }
+        .rc-1  { background: rgba(255,170,64,0.1);  border: 2px solid rgba(255,170,64,0.28); color: #ffaa40; }
+        .rc-2  { background: rgba(255,170,64,0.1);  border: 2px solid rgba(255,170,64,0.28); color: #ffaa40; }
+        .rc-3  { background: rgba(255,199,44,0.1);  border: 2px solid rgba(255,199,44,0.3);  color: #ffc72c; }
+        .rc-4  { background: rgba(255,199,44,0.14); border: 2px solid rgba(255,199,44,0.42); color: #ffc72c; }
+        .rc-6  { background: rgba(232,44,44,0.14);  border: 2px solid rgba(232,44,44,0.42);  color: #e83030; }
+        .rc-w  { background: rgba(232,44,44,0.15);  border: 2px solid rgba(232,44,44,0.5);   color: #e83030; }
+        .rc-ex { background: rgba(255,255,255,0.04); border: 2px solid rgba(255,255,255,0.1);  color: rgba(255,255,255,0.45); font-size: 0.58rem; letter-spacing: -0.5px; text-align: center; }
+
+        .ball-body { flex: 1; min-width: 0; }
+        .ball-meta { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; flex-wrap: wrap; }
+        .ball-over     { font-size: 0.62rem; color: rgba(255,255,255,0.28); font-weight: 700; letter-spacing: 0.5px; }
+        .ball-name-sep { color: rgba(255,255,255,0.15); font-size: 0.75rem; }
+        .ball-batsman  { font-size: 0.78rem; font-weight: 700; color: var(--gold); }
+        .ball-bowler   { font-size: 0.75rem; font-weight: 600; color: var(--green); }
+
+        .ball-commentary { font-size: 0.88rem; color: rgba(255,255,255,0.75); line-height: 1.55; font-weight: 500; }
+        .ball-commentary.big { font-weight: 700; color: white; font-size: 0.93rem; }
+
+        .ball-tags { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+        .btag { font-size: 0.63rem; font-weight: 800; padding: 3px 9px; border-radius: 50px; letter-spacing: 0.5px; text-transform: uppercase; }
+        .btag-four   { background: rgba(255,199,44,0.14);  border: 1px solid rgba(255,199,44,0.3);  color: #ffc72c; }
+        .btag-six    { background: rgba(180,100,255,0.14); border: 1px solid rgba(180,100,255,0.35); color: #b464ff; }
+        .btag-wicket { background: rgba(255,60,60,0.13);   border: 1px solid rgba(255,60,60,0.35);   color: #ff5a5a; }
+        .btag-nb     { background: rgba(255,140,66,0.13);  border: 1px solid rgba(255,140,66,0.3);   color: #ff8c42; }
+        .btag-wide   { background: rgba(255,230,80,0.1);   border: 1px solid rgba(255,230,80,0.25);  color: #ffe650; }
+        .btag-bye    { background: rgba(255,170,64,0.1);  border: 1px solid rgba(255,170,64,0.28); color: var(--blue); }
+
+        /* ── EMPTY / SPINNER ── */
+        .empty-state { text-align: center; padding: 60px 0; color: rgba(255,255,255,0.2); font-size: 0.95rem; }
+        .empty-state .ei { font-size: 2.8rem; margin-bottom: 14px; }
+        .spinner-wrap { display: flex; align-items: center; gap: 14px; color: rgba(255,255,255,0.3); padding: 60px 0; justify-content: center; }
+        .spinner { width: 24px; height: 24px; border: 3px solid rgba(255,255,255,0.1); border-top-color: var(--green); border-radius: 50%; animation: spin 0.7s linear infinite; border-top-color: #e83030; }
+
+        /* ── MINI BALL STRIP ── */
+        .ball-strip {
+            display: flex; align-items: center; gap: 5px;
+            flex-wrap: wrap; margin-bottom: 16px;
+        }
+        .ball-strip-label {
+            font-size: 0.58rem; font-weight: 700; letter-spacing: 1px;
+            text-transform: uppercase; color: rgba(255,255,255,0.25);
+            margin-right: 4px;
+        }
+        .bs-ball {
+            width: 30px; height: 30px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.68rem; font-weight: 900; flex-shrink: 0;
+            border: 1.5px solid;
+        }
+        .bs-0  { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.1);  color: rgba(255,255,255,0.3); }
+        .bs-1  { background: rgba(255,170,64,0.09);  border-color: rgba(255,170,64,0.25);  color: #ffaa40; }
+        .bs-2  { background: rgba(255,170,64,0.12);  border-color: rgba(255,170,64,0.3);   color: #ffaa40; }
+        .bs-3  { background: rgba(255,199,44,0.12);  border-color: rgba(255,199,44,0.3);   color: #ffc72c; }
+        .bs-4  { background: rgba(255,199,44,0.18);  border-color: rgba(255,199,44,0.45);  color: #ffc72c; font-size: 0.62rem; }
+        .bs-6  { background: rgba(232,44,44,0.15);   border-color: rgba(232,44,44,0.45);   color: #e83030; }
+        .bs-w  { background: rgba(232,44,44,0.18);   border-color: rgba(232,44,44,0.5);    color: #e83030; }
+        .bs-ex { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.12); color: rgba(255,255,255,0.4); font-size: 0.6rem; }
+        .bs-sep { width: 1px; height: 20px; background: rgba(255,255,255,0.1); margin: 0 3px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ── NAV ── */
+        .board-nav { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+        .nav-link {
+            background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.6); padding: 10px 20px; border-radius: 12px;
+            font-size: 0.84rem; font-weight: 600; text-decoration: none; transition: all 0.2s;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* ── PLAYER SCORECARD ── */
+        .scorecard-section { margin-top: 28px; }
+        .sc-header {
+            display: flex; align-items: center; gap: 12px; margin-bottom: 14px;
+        }
+        .sc-title { font-size: 1rem; font-weight: 800; }
+        .sc-badge {
+            background: rgba(255,255,255,0.07); border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.4); font-size: 0.68rem; font-weight: 700;
+            padding: 3px 10px; border-radius: 50px;
+        }
+
+        /* Batting grid */
+        .batting-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 24px;
+        }
+        .player-card {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px; padding: 14px 16px;
+            display: flex; align-items: center; gap: 14px;
+            transition: background 0.2s;
+        }
+        .player-card:hover { background: rgba(255,255,255,0.06); }
+        .player-card.out   { border-color: rgba(255,90,90,0.15); }
+        .player-card.notout { border-color: rgba(0,232,135,0.15); background: rgba(0,232,135,0.02); }
+        .player-card.top-scorer { border-color: rgba(255,199,44,0.25); background: rgba(255,199,44,0.04); }
+
+        .p-avatar {
+            width: 42px; height: 42px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 0.85rem; font-weight: 800; flex-shrink: 0;
+            background: rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.6);
+        }
+        .p-avatar.av-green { background: rgba(0,232,135,0.15); color: var(--green); }
+        .p-avatar.av-gold  { background: rgba(255,199,44,0.15); color: var(--gold); }
+        .p-avatar.av-red   { background: rgba(255,90,90,0.15);  color: var(--red); }
+
+        .p-info { flex: 1; min-width: 0; }
+        .p-name {
+            font-size: 0.84rem; font-weight: 700;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            margin-bottom: 2px;
+        }
+        .p-dismiss {
+            font-size: 0.68rem; color: rgba(255,255,255,0.3);
+            margin-bottom: 6px;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .p-stats {
+            display: flex; gap: 12px; flex-wrap: wrap;
+        }
+        .p-stat {
+            display: flex; flex-direction: column; align-items: center;
+            gap: 1px;
+        }
+        .p-stat-val  { font-size: 0.9rem; font-weight: 800; }
+        .p-stat-lbl  { font-size: 0.55rem; color: rgba(255,255,255,0.3); text-transform: uppercase; letter-spacing: 0.8px; font-weight: 700; }
+        .p-runs { font-size: 1.2rem; font-weight: 900; }
+
+        /* Bowling table */
+        .bowling-table {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px; overflow: hidden;
+            margin-bottom: 24px;
+        }
+        .bt-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr 1fr;
+            padding: 11px 16px;
+            align-items: center;
+            gap: 8px;
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            transition: background 0.15s;
+        }
+        .bt-row:last-child { border-bottom: none; }
+        .bt-row:hover { background: rgba(255,255,255,0.04); }
+        .bt-head {
+            font-size: 0.6rem; font-weight: 800; text-transform: uppercase;
+            letter-spacing: 1px; color: rgba(255,255,255,0.25);
+            background: rgba(255,255,255,0.02);
+        }
+        .bt-name { font-size: 0.84rem; font-weight: 700; }
+        .bt-val  { font-size: 0.85rem; font-weight: 700; text-align: center; }
+        .bt-val.w  { color: var(--red); }
+        .bt-val.ec { color: var(--blue); }
+
+        @media (max-width: 600px) {
+            .hero-score { font-size: 3.4rem; }
+            .team-nm  { font-size: 1.2rem; }
+            main { padding: 20px 14px 60px; }
+            .summary-card { padding: 20px 18px; }
+            .run-circle { width: 36px; height: 36px; font-size: 0.88rem; }
+            .batting-grid { grid-template-columns: 1fr; }
+            .bt-row { grid-template-columns: 2fr 1fr 1fr 1fr 1fr; font-size: 0.78rem; padding: 10px 12px; }
+        }
+    </style>
+</head>
+
+<body onload="loadDetails('{{ match_id }}')">
+
+    <header>
+        <a href="/" style="text-decoration:none;color:inherit"><div class="brand">🏏 Pitch-X</div></a>
+        <div class="live-badge"><div class="pulse-dot"></div> Live</div>
+        <a href="/live" class="back-btn">← All Matches</a>
+    </header>
+
+    <main>
+        <!-- Summary card -->
+        <div id="summary-wrap">
+            <div class="spinner-wrap"><div class="spinner"></div> Loading match…</div>
+        </div>
+
+        <!-- Player scorecards (above commentary) -->
+        <div id="player-section"></div>
+
+        <!-- Commentary section -->
+        <div class="comm-hdr" id="comm-hdr" style="display:none">
+            <div class="comm-title">🎤 Live Commentary</div>
+            <div class="comm-count" id="ball-count">—</div>
+        </div>
+        <div id="commentary-feed"></div>
+
+        <div class="board-nav">
+            <a href="/live"  class="nav-link">🏟️ All Matches</a>
+            <a href="/"      class="nav-link">🏠 Home</a>
+        </div>
+    </main>
+
+    <script src="/static/app.js"></script>
+    <script>
+    /* ══════════════════════════════════════════════════
+       SEEDED PRNG  (mulberry32)
+    ══════════════════════════════════════════════════ */
+    function mulberry32(seed) {
+        return function() {
+            seed |= 0; seed = seed + 0x6D2B79F5 | 0;
+            let t = Math.imul(seed ^ seed >>> 15, 1 | seed);
+            t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+            return ((t ^ t >>> 14) >>> 0) / 4294967296;
+        };
+    }
+    function rngPick(rng, arr) { return arr[Math.floor(rng() * arr.length)]; }
+    function rngShuffle(rng, arr) {
+        const c = [...arr];
+        for (let i = c.length - 1; i > 0; i--) {
+            const j = Math.floor(rng() * (i + 1));
+            [c[i], c[j]] = [c[j], c[i]];
+        }
+        return c;
+    }
+
+    /* ══════════════════════════════════════════════════
+       PLAYER NAME POOL
+    ══════════════════════════════════════════════════ */
+    const NAME_POOL = [
+        'Arjun Kapoor','Rahul Singh','Vikram Nair','Suresh Yadav','Manish Dey',
+        'Deepak Roy','Kiran Patel','Pradeep Kumar','Chirag Shah','Tushar Mehta',
+        'Jai Verma','Nikhil Joshi','Harish Dev','Lalit Pillai','Dev Reddy',
+        'Ryan Costa','James White','Tom Richards','Mark Johnson','Chris Davis',
+        'Liam Brooks','Nathan Hill','Sean Murphy','Adam Fletcher','Ben Clarke',
+        'Arun Bose','Ravi Iyer','Sujit Das','Yash Gupta','Anil Mishra',
+        'Karl Thompson','Peter Mitchell','David Williams','Robert Brown','Paul Wilson'
+    ];
+
+    function generatePlayers(matchId) {
+        const rng      = mulberry32(matchId * 2345678);
+        const shuffled = rngShuffle(rng, NAME_POOL);
+        return { team1: shuffled.slice(0, 11), team2: shuffled.slice(11, 22) };
+    }
+
+    /* ══════════════════════════════════════════════════
+       COMMENTARY TEMPLATES
+    ══════════════════════════════════════════════════ */
+    const C = {
+        0: [
+            '{batsman} defends solidly. Dot ball.',
+            '{bowler} beats {batsman} outside off! Excellent bowling.',
+            'Tight line, {batsman} pushes it back to {bowler}. Dot.',
+            '{batsman} lets it go through. Good discipline from {bowler}.',
+            'Dead bat from {batsman}. {bowler} keeps it tight.',
+            '{bowler} firing in at the stumps. {batsman} digs it out. Dot.',
+            'No run. {bowler} finding good areas here.',
+        ],
+        1: [
+            '{batsman} nudges it toward mid-wicket for a single.',
+            'Flick off the pads — {batsman} takes a quick one.',
+            '{batsman} pushes to cover, easy single taken.',
+            'Dabbed to fine leg, {batsman} and partner cross for one.',
+            'Rolled into the gap, they jog through for a single.',
+            '{batsman} drives to mid-on, taps and runs quickly.',
+            'Guided to third man — one run.',
+        ],
+        2: [
+            '{batsman} drives through the covers — good running, two!',
+            'Into the gap at mid-wicket, they turn for two!',
+            '{batsman} steers to third man — two comfortable runs.',
+            'Great placement by {batsman}, finds the gap for 2.',
+            'Pushed wide of mid-off — they come back for two.',
+            'Misfield at cover! {batsman} makes it two.',
+            '{batsman} whips it off the pads, two runs all the way.',
+        ],
+        3: [
+            'Misfield at cover! {batsman} capitalises — three runs!',
+            'Driven to long-off, overthrow adds a third run!',
+            '{batsman} dabs to third man and they scramble for 3!',
+            'Great running between the wickets — three taken!',
+            'Excellent work from both batsmen — three all the way!',
+        ],
+        4: [
+            'FOUR! {batsman} drives {bowler} through the covers magnificently!',
+            'BOUNDARY! {batsman} pulls it wide of mid-wicket — four!',
+            'Beautiful cut shot by {batsman} — races away to the fence!',
+            '{batsman} flicks off the pads, streaks to the fine leg boundary!',
+            'FOUR! Edged through the gap between slip and gully!',
+            'Lofted over mid-off, lands just inside the rope — FOUR!',
+            '{batsman} opens the face and guides it to third man. FOUR!',
+            'What a shot! {batsman} whips {bowler} through midwicket — FOUR!',
+            'Short ball — {batsman} pulls it ferociously to the fence! FOUR!',
+            '{batsman} absolutely creams that through extra cover! Four!',
+        ],
+        6: [
+            'SIX! {batsman} launches {bowler} clean over long-on! Massive!',
+            'MAXIMUM! {batsman} slog-sweeps it into the stands!',
+            'Gone! Gone! Gone! Straight back over {bowler}\'s head — SIX!',
+            '{batsman} makes room and SMASHES it over extra cover — SIX!',
+            'What a hit! {batsman} muscles it over midwicket — SIX!',
+            '{batsman} steps out and lofts {bowler} into the crowd! SIX!',
+            'Into orbit! {batsman} dispatches {bowler} way into the stands!',
+            '{batsman} hits {bowler} over long-off! That\'s a monster SIX!',
+            'The crowd erupts! {batsman} absolutely bludgeons that for SIX!',
+        ],
+        wide: [
+            '{bowler} strays down the leg side — wide called by the umpire.',
+            'Too wide outside off stump. Umpire signals wide.',
+            '{bowler} goes too full and too wide. Wide!',
+            'Down the leg side, can\'t reach it. Wide signal from the umpire.',
+        ],
+        no_ball: [
+            'No ball! {bowler} oversteps the crease. FREE HIT coming up!',
+            'Foot outside the crease — no ball! Costly for {bowler}.',
+            'The umpire calls no ball. {bowler} has overstepped. Free hit!',
+        ],
+        bye: [
+            'Byes! {batsman} misses, keeper misses — they scamper through!',
+            'Past the keeper! Quick-thinking batting side picks up byes.',
+            'Keeper fumbles behind the stumps — byes added.',
+        ],
+    };
+
+    const WC = {
+        'Bowled':     [
+            '{bowler} delivers a perfect yorker — {batsman} is BOWLED! Stumps shattered!',
+            'BOWLED! {bowler} hits the top of off stump. {batsman} has to go!',
+            'Through the gate! {batsman} is clean bowled by {bowler}!',
+            '{bowler} fires a full one — {batsman} is bowled comprehensively!',
+        ],
+        'Caught':     [
+            'CAUGHT! {batsman} edges {bowler} to the keeper — taken sharply!',
+            'Caught at slip! {batsman} gets a thick outside edge off {bowler}!',
+            'Up in the air and safely taken at mid-on! {batsman} is out!',
+            'CAUGHT! Mistimed pull shot — fielder at long-on takes a good catch!',
+            '{batsman} tries to go over the top — {bowler} gets the reward! CAUGHT!',
+        ],
+        'LBW':        [
+            'PLUMB LBW! {bowler} traps {batsman} right in front. Finger up immediately!',
+            'LBW! {batsman} misses the sweep — ball strikes pad flush. Given!',
+            'Big appeal for LBW… umpire raises the finger! {batsman} is OUT!',
+            'Huge shout from {bowler}! Given — LBW! {batsman} departs.',
+        ],
+        'Run Out':    [
+            'RUN OUT! Brilliant throw from the deep! {batsman} is well short!',
+            'Direct hit on the stumps! What reflexes! {batsman} is run out!',
+            'Mix-up in the middle — {batsman} is sacrificed! Run out!',
+            'Chaos! The fielder hits the target directly — {batsman} is gone!',
+        ],
+        'Stumped':    [
+            'STUMPED! {batsman} steps out, misses — keeper whips the bails off!',
+            'Down the track and missed! Keeper does the rest — {batsman} stumped!',
+            '{batsman} ventures out and pays the price — stumped behind the wicket!',
+        ],
+        'Hit Wicket': [
+            'OH! {batsman} has hit his own wicket playing that shot! Out, hit wicket!',
+            'Bizarre! {batsman} steps back and dislodges the bails — hit wicket!',
+            '{batsman} loses balance and hits the stumps! Unlucky — hit wicket!',
+        ],
+    };
+
+    function pickCommentary(rng, entry, batsman, bowler) {
+        const run      = typeof entry === 'object' ? (entry.runs ?? 0) : entry;
+        const type     = typeof entry === 'object' ? (entry.type  || 'normal') : 'normal';
+        const isWicket = typeof entry === 'object' ? (entry.is_wicket || false) : false;
+        const wType    = typeof entry === 'object' ? (entry.wicket_type || null) : null;
+
+        const fill = t => t
+            .replace('{batsman}', `<b style="color:var(--green)">${batsman}</b>`)
+            .replace('{bowler}',  `<b style="color:var(--red)">${bowler}</b>`);
+
+        if (isWicket) {
+            const pool = WC[wType] || WC['Caught'];
+            return { text: fill(rngPick(rng, pool)), big: true };
+        }
+        if (type === 'wide')    return { text: fill(rngPick(rng, C.wide)),    big: false };
+        if (type === 'no_ball') return { text: fill(rngPick(rng, C.no_ball)), big: false };
+        if (type === 'bye')     return { text: fill(rngPick(rng, C.bye)),     big: false };
+
+        const pool = C[run] || C[0];
+        return { text: fill(rngPick(rng, pool)), big: run >= 4 };
+    }
+
+    /* ══════════════════════════════════════════════════
+       SIMULATE PLAYER STATE BALL BY BALL
+    ══════════════════════════════════════════════════ */
+    function simulateBalls(history, battingTeam, bowlingTeam, matchId) {
+        if (!history || history.length === 0) return [];
+
+        const cRng    = mulberry32(matchId * 99991);  // deterministic per match
+        const bowlers = bowlingTeam.slice(5);          // last 6 as bowlers
+
+        let strikerIdx    = 0;
+        let nonStrikerIdx = 1;
+        let nextBatIdx    = 2;
+        let legalBalls    = 0;
+
+        return history.map((entry) => {
+            const run      = typeof entry === 'object' ? (entry.runs ?? 0) : entry;
+            const type     = typeof entry === 'object' ? (entry.type  || 'normal') : 'normal';
+            const isWicket = typeof entry === 'object' ? (entry.is_wicket || false) : false;
+            const wType    = typeof entry === 'object' ? (entry.wicket_type || null) : null;
+            const isLegal  = !['no_ball', 'wide'].includes(type);
+
+            const overNum = Math.floor(legalBalls / 6) + 1;
+            const ballNum = isLegal ? (legalBalls % 6) + 1 : '*';
+            const bowler  = bowlers[Math.floor(legalBalls / 6) % bowlers.length] || bowlingTeam[0];
+            const striker = battingTeam[strikerIdx] || 'Batsman';
+
+            const comm = pickCommentary(cRng, entry, striker, bowler);
+
+            // Update simulation state
+            if (isLegal) {
+                if ((run % 2) === 1) [strikerIdx, nonStrikerIdx] = [nonStrikerIdx, strikerIdx];
+                legalBalls++;
+                if (legalBalls % 6 === 0) [strikerIdx, nonStrikerIdx] = [nonStrikerIdx, strikerIdx];
+            }
+            if (isWicket) { strikerIdx = nextBatIdx++; }
+
+            return { overNum, ballNum, run, type, isWicket, wType, striker, bowler, comm, isLegal };
+        });
+    }
+
+    /* ══════════════════════════════════════════════════
+       RENDERING HELPERS
+    ══════════════════════════════════════════════════ */
+    function rcClass(run, isWicket, type) {
+        if (isWicket) return 'rc-w';
+        if (!['normal','bye'].includes(type)) return 'rc-ex';
+        return ['rc-0','rc-1','rc-2','rc-3','rc-4','rc-0','rc-6'][run] || 'rc-0';
+    }
+    function rcLabel(run, isWicket, type) {
+        if (isWicket)           return 'W';
+        if (type === 'wide')    return 'Wd';
+        if (type === 'no_ball') return 'NB';
+        return run;
+    }
+    function cardCls(run, isWicket) {
+        if (isWicket)  return 'card-wicket';
+        if (run === 6) return 'card-six';
+        if (run === 4) return 'card-four';
+        return '';
+    }
+    function buildTags(run, isWicket, wType, type) {
+        let t = '';
+        if (type === 'no_ball') t += `<span class="btag btag-nb">No Ball</span>`;
+        if (type === 'wide')    t += `<span class="btag btag-wide">Wide</span>`;
+        if (type === 'bye')     t += `<span class="btag btag-bye">Bye</span>`;
+        if (run === 4)          t += `<span class="btag btag-four">FOUR</span>`;
+        if (run === 6)          t += `<span class="btag btag-six">SIX</span>`;
+        if (isWicket)           t += `<span class="btag btag-wicket">🏏 ${wType || 'Out'}</span>`;
+        return t;
+    }
+
+    function renderBallsFeed(balls) {
+        if (!balls.length) return `
+            <div class="empty-state">
+                <div class="ei">🏏</div>
+                No balls bowled yet — commentary will appear here live
+            </div>`;
+
+        let html = '';
+        let lastOver = -1;
+
+        // Newest first
+        [...balls].reverse().forEach(b => {
+            if (b.isLegal && b.overNum !== lastOver) {
+                lastOver = b.overNum;
+                html += `
+                <div class="over-sep">
+                    <div class="over-sep-line"></div>
+                    <div class="over-sep-label">Over ${b.overNum}</div>
+                    <div class="over-sep-line"></div>
+                </div>`;
+            }
+            const tags = buildTags(b.run, b.isWicket, b.wType, b.type);
+            html += `
+            <div class="ball-card ${cardCls(b.run, b.isWicket)}">
+                <div class="run-circle ${rcClass(b.run, b.isWicket, b.type)}">
+                    ${rcLabel(b.run, b.isWicket, b.type)}
+                </div>
+                <div class="ball-body">
+                    <div class="ball-meta">
+                        <span class="ball-over">${b.overNum}.${b.ballNum}</span>
+                        <span class="ball-name-sep">·</span>
+                        <span class="ball-batsman">${b.striker}</span>
+                        <span class="ball-name-sep">vs</span>
+                        <span class="ball-bowler">${b.bowler}</span>
+                    </div>
+                    <div class="ball-commentary ${b.comm.big ? 'big' : ''}">${b.comm.text}</div>
+                    ${tags ? `<div class="ball-tags">${tags}</div>` : ''}
+                </div>
+            </div>`;
+        });
+        return html;
+    }
+
+    function buildBallStrip(history) {
+        if (!history || !history.length) return '';
+
+        // Show last 12 entries (most recent at right)
+        const recent = history.slice(-12);
+
+        // Split into current-over balls vs previous-over balls
+        let legalCount = 0;
+        const annotated = recent.map(e => {
+            const type = typeof e === 'object' ? (e.type || 'normal') : 'normal';
+            const runs = typeof e === 'object' ? (e.runs ?? 0) : e;
+            const isWicket = typeof e === 'object' ? (e.is_wicket || false) : false;
+            const isLegal = !['no_ball','wide'].includes(type);
+            if (isLegal) legalCount++;
+            return { type, runs, isWicket, isLegal };
+        });
+
+        // Figure out current-over start (last multiple-of-6 legal balls before now)
+        const totalLegal = history.filter(e => !['no_ball','wide'].includes(typeof e === 'object' ? (e.type||'normal') : 'normal')).length;
+        const overBallsSoFar = totalLegal % 6;  // balls in current over
+
+        // Rebuild per-ball with over tracking
+        let legalIdx = 0;
+        let chips = [];
+        annotated.forEach((b, i) => {
+            // Insert over separator when crossing over boundary
+            if (b.isLegal) legalIdx++;
+            // Determine class
+            let cls, label;
+            if (b.isWicket)           { cls = 'bs-w';  label = 'W'; }
+            else if (b.type === 'wide')    { cls = 'bs-ex'; label = 'Wd'; }
+            else if (b.type === 'no_ball') { cls = 'bs-ex'; label = 'NB'; }
+            else if (b.type === 'bye')     { cls = 'bs-ex'; label = 'B'+b.runs; }
+            else if (b.runs === 6)     { cls = 'bs-6';  label = '6'; }
+            else if (b.runs === 4)     { cls = 'bs-4';  label = '4'; }
+            else if (b.runs === 3)     { cls = 'bs-3';  label = '3'; }
+            else if (b.runs === 2)     { cls = 'bs-2';  label = '2'; }
+            else if (b.runs === 1)     { cls = 'bs-1';  label = '1'; }
+            else                       { cls = 'bs-0';  label = '0'; }
+            chips.push(`<div class="bs-ball ${cls}" title="${b.type}${b.isWicket?' | W':''}">${label}</div>`);
+        });
+
+        return `<div class="ball-strip">
+            <span class="ball-strip-label">This over</span>
+            ${chips.join('')}
+        </div>`;
+    }
+
+    function renderSummaryHTML(data) {
+        const overs   = Math.floor(data.balls / 6) + '.' + (data.balls % 6);
+        const result  = data.result || 'Live';
+        const wickets = data.wickets ?? 0;
+        const extras  = data.extras  || {};
+        const nb = extras.no_balls||0, wd = extras.wides||0, bye = extras.byes||0;
+        const nbWdBye = nb + wd + bye;
+
+        const isLive = result === 'Live', isRain = result === 'Rain Delay', isAban = result === 'Abandoned';
+        const sClass = isLive ? 'st-live' : isRain ? 'st-rain' : isAban ? 'st-aban' : 'st-won';
+        const sIcon  = isLive ? '🟢' : isRain ? '🌧️' : isAban ? '⛔' : '🏆';
+
+        let metaPills = '';
+        if (data.format)          metaPills += `<span class="mpill gold">${data.format}</span>`;
+        if (data.innings)         metaPills += `<span class="mpill green">${data.innings === 1 ? '1st Innings' : '2nd Innings'}</span>`;
+        if (data.toss_winner)     metaPills += `<span class="mpill">🪙 ${data.toss_winner} won · chose ${data.toss_choice || 'bat'}</span>`;
+        if (data.innings1_score != null) metaPills += `<span class="mpill blue">1st Inn: ${data.innings1_score}</span>`;
+
+        const rNeeded = data.target && data.innings === 2 ? Math.max(0, data.target - data.current_score) : null;
+        const bLeft   = rNeeded !== null ? Math.max(0, (data.total_balls || 120) - data.balls) : null;
+        const ovLeft  = bLeft !== null ? Math.floor(bLeft/6)+'.'+bLeft%6 : null;
+
+        return `
+        <div class="summary-card">
+            <div class="match-teams">
+                <span class="team-nm">${data.team1}</span>
+                <span class="vs-chip">vs</span>
+                <span class="team-nm">${data.team2}</span>
+            </div>
+            ${metaPills ? `<div class="meta-pills">${metaPills}</div>` : ''}
+            ${rNeeded !== null ? `
+            <div style="display:inline-flex;align-items:center;gap:6px;
+                        background:rgba(255,90,90,0.09);border:1px solid rgba(255,90,90,0.22);
+                        color:var(--red);font-size:0.8rem;font-weight:700;padding:5px 14px;
+                        border-radius:50px;margin-bottom:14px;">
+                🎯 ${rNeeded} needed off ${ovLeft} overs
+            </div>` : ''}
+            <div class="hero-score-row">
+                <div class="hero-score">${data.current_score}/${wickets}</div>
+                ${data.target ? `<div class="hero-target">
+                    <div class="ht-label">Target</div>
+                    <div class="ht-val">${data.target}</div>
+                </div>` : ''}
+            </div>
+            ${buildBallStrip(data.history || [])}
+            <div class="stats-row">
+                <div class="sbox"><span class="slabel">Overs</span><span class="sval">${overs}</span></div>
+                <div class="sbox green"><span class="slabel">CRR</span><span class="sval green">${data.crr}</span></div>
+                <div class="sbox red"><span class="slabel">RRR</span><span class="sval red">${(isLive||isRain||isAban) ? data.rrr : '—'}</span></div>
+                <div class="sbox gold"><span class="slabel">4s</span><span class="sval gold">${data.fours}</span></div>
+                <div class="sbox gold"><span class="slabel">6s</span><span class="sval gold">${data.sixes}</span></div>
+                ${nbWdBye > 0 ? `<div class="sbox"><span class="slabel">Extras</span><span class="sval blue">${nbWdBye}</span></div>` : ''}
+            </div>
+            <div class="status-bar ${sClass}">${sIcon} &nbsp; ${result}</div>
+        </div>`;
+    }
+
+    /* ══════════════════════════════════════════════════
+       PLAYER STAT COMPUTATION
+    ══════════════════════════════════════════════════ */
+    function computePlayerStats(balls, battingTeam, bowlingTeam) {
+        // Init batting map
+        const batting = {};
+        battingTeam.forEach(name => {
+            batting[name] = { name, runs: 0, balls: 0, fours: 0, sixes: 0,
+                              isOut: false, wType: null, bowlerOut: null, didBat: false };
+        });
+
+        // Init bowling map
+        const bowling = {};
+        bowlingTeam.forEach(name => {
+            bowling[name] = { name, legalBalls: 0, runs: 0, wickets: 0, didBowl: false };
+        });
+
+        balls.forEach(b => {
+            const bat  = batting[b.striker];
+            const bowl = bowling[b.bowler];
+
+            if (bat) {
+                bat.didBat = true;
+                if (b.isLegal) bat.balls++;
+                // runs from bat (not extras/byes)
+                if (!['wide', 'bye'].includes(b.type)) {
+                    bat.runs += b.run;
+                    if (b.run === 4) bat.fours++;
+                    if (b.run === 6) bat.sixes++;
+                }
+                if (b.isWicket) { bat.isOut = true; bat.wType = b.wType; bat.bowlerOut = b.bowler; }
+            }
+
+            if (bowl) {
+                bowl.didBowl = true;
+                if (b.isLegal) bowl.legalBalls++;
+                // runs conceded (not byes)
+                if (b.type === 'wide' || b.type === 'no_ball') bowl.runs += 1 + b.run;
+                else if (b.type !== 'bye') bowl.runs += b.run;
+                if (b.isWicket && b.wType !== 'Run Out') bowl.wickets++;
+            }
+        });
+
+        return {
+            batting: Object.values(batting).filter(p => p.didBat),
+            bowling: Object.values(bowling).filter(p => p.didBowl),
+        };
+    }
+
+    function dismissalText(p) {
+        if (!p.isOut) return 'not out';
+        const b = p.bowlerOut ? `b ${p.bowlerOut.split(' ').pop()}` : '';
+        switch(p.wType) {
+            case 'Bowled':     return `b ${p.bowlerOut}`;
+            case 'Caught':     return `c & b ${p.bowlerOut}`;
+            case 'LBW':        return `lbw ${b}`;
+            case 'Stumped':    return `st ${b}`;
+            case 'Run Out':    return 'run out';
+            case 'Hit Wicket': return `hit wkt ${b}`;
+            default:           return p.wType || 'out';
+        }
+    }
+
+    function avatarInitials(name) {
+        return name.split(' ').map(w => w[0]).join('').slice(0, 2).toUpperCase();
+    }
+
+    function renderPlayerSection(stats, data) {
+        if (!stats.batting.length && !stats.bowling.length) return '';
+
+        const maxRuns    = Math.max(...stats.batting.map(p => p.runs), 0);
+        const maxWickets = Math.max(...stats.bowling.map(p => p.wickets), 0);
+
+        const battingHTML = stats.batting.map(p => {
+            const sr       = p.balls > 0 ? ((p.runs / p.balls) * 100).toFixed(1) : '0.0';
+            const isTop    = p.runs === maxRuns && maxRuns > 0;
+            const avCls    = isTop ? 'av-gold' : p.isOut ? '' : 'av-green';
+            const cardCls  = isTop ? 'top-scorer' : p.isOut ? 'out' : 'notout';
+            return `
+            <div class="player-card ${cardCls}">
+                <div class="p-avatar ${avCls}">${avatarInitials(p.name)}</div>
+                <div class="p-info">
+                    <div class="p-name">${p.name}</div>
+                    <div class="p-dismiss">${dismissalText(p)}</div>
+                    <div class="p-stats">
+                        <div class="p-stat">
+                            <span class="p-stat-val p-runs" style="color:${isTop?'var(--gold)':p.isOut?'rgba(255,255,255,0.9)':'var(--green)'}">${p.runs}</span>
+                            <span class="p-stat-lbl">runs</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-val">${p.balls}</span>
+                            <span class="p-stat-lbl">balls</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-val" style="color:var(--gold)">${p.fours}</span>
+                            <span class="p-stat-lbl">4s</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-val" style="color:var(--purple)">${p.sixes}</span>
+                            <span class="p-stat-lbl">6s</span>
+                        </div>
+                        <div class="p-stat">
+                            <span class="p-stat-val" style="color:var(--blue)">${sr}</span>
+                            <span class="p-stat-lbl">SR</span>
+                        </div>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+
+        const bowlingHTML = stats.bowling.map(p => {
+            const overs = Math.floor(p.legalBalls / 6) + '.' + (p.legalBalls % 6);
+            const econ  = p.legalBalls > 0 ? ((p.runs / p.legalBalls) * 6).toFixed(1) : '0.0';
+            const isTop = p.wickets === maxWickets && maxWickets > 0;
+            return `
+            <div class="bt-row">
+                <div class="bt-name" style="display:flex;align-items:center;gap:10px">
+                    <div class="p-avatar" style="width:32px;height:32px;font-size:0.7rem;flex-shrink:0;${isTop?'background:rgba(255,90,90,0.18);color:var(--red)':''}">${avatarInitials(p.name)}</div>
+                    <span style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${p.name}</span>
+                </div>
+                <div class="bt-val">${overs}</div>
+                <div class="bt-val">${p.runs}</div>
+                <div class="bt-val w" style="${isTop?'font-size:1rem;':''}">${'●'.repeat(Math.min(p.wickets,5))} ${p.wickets}</div>
+                <div class="bt-val ec">${econ}</div>
+            </div>`;
+        }).join('');
+
+        const battingTeamName = data.innings === 2 ? data.team2 : data.team1;
+        const bowlingTeamName = data.innings === 2 ? data.team1 : data.team2;
+
+        return `
+        <div class="scorecard-section">
+            <div class="sc-header">
+                <div class="sc-title">🏏 Batting — ${battingTeamName}</div>
+                <div class="sc-badge">${stats.batting.length} players</div>
+            </div>
+            <div class="batting-grid">${battingHTML}</div>
+
+            <div class="sc-header">
+                <div class="sc-title">🎯 Bowling — ${bowlingTeamName}</div>
+                <div class="sc-badge">${stats.bowling.length} bowlers</div>
+            </div>
+            <div class="bowling-table">
+                <div class="bt-row bt-head">
+                    <div>Bowler</div><div style="text-align:center">ov</div>
+                    <div style="text-align:center">runs</div>
+                    <div style="text-align:center">wkts</div>
+                    <div style="text-align:center">econ</div>
+                </div>
+                ${bowlingHTML}
+            </div>
+        </div>`;
+    }
+
+    /* ══════════════════════════════════════════════════
+       MAIN ENTRY POINT
+    ══════════════════════════════════════════════════ */
+    window.loadDetails = function(id) {
+        const players = generatePlayers(id);
+        let prevLen   = -1;
+
+        async function fetchAndRender() {
+            try {
+                const res  = await fetch(`/match/${id}`);
+                const data = await res.json();
+
+                if (data.error) {
+                    document.getElementById('summary-wrap').innerHTML =
+                        `<div style="color:rgba(255,255,255,0.35);padding:60px 0;text-align:center;font-size:1rem">⚠️ Match not found</div>`;
+                    return;
+                }
+
+                // Always update summary (scores change frequently)
+                document.getElementById('summary-wrap').innerHTML = renderSummaryHTML(data);
+
+                const history = data.history || [];
+
+                // Batting/bowling teams based on innings
+                const batting  = data.innings === 2 ? players.team2 : players.team1;
+                const bowling  = data.innings === 2 ? players.team1 : players.team2;
+                const balls    = simulateBalls(history, batting, bowling, id);
+
+                // Commentary header
+                document.getElementById('comm-hdr').style.display = 'flex';
+                document.getElementById('ball-count').textContent =
+                    `${history.length} ball${history.length !== 1 ? 's' : ''}`;
+
+                // Re-render feed + player cards only when new balls arrive
+                if (history.length !== prevLen) {
+                    document.getElementById('commentary-feed').innerHTML = renderBallsFeed(balls);
+                    // Player scorecards
+                    const stats = computePlayerStats(balls, batting, bowling);
+                    document.getElementById('player-section').innerHTML = renderPlayerSection(stats, data);
+                    prevLen = history.length;
+                }
+            } catch(e) {
+                console.error(e);
+            }
+        }
+
+        fetchAndRender();
+        setInterval(fetchAndRender, 3000);
+    };
+    </script>
+</body>
+</html>

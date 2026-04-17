@@ -1,15 +1,51 @@
 {
-  "matches": [
-    {
-      "id": 1,
-      "team1": "India",
-      "team2": "Australia",
-      "target": 180,
-      "current_score": 120,
-      "balls": 92,
-      "crr": 7.89,
-      "rrr": 10.0,
-      "result": "In Progress"
-    }
-  ]
+    "matches": [
+        {
+            "id": "RL",
+            "team1": "RR",
+            "team2": "LSG",
+            "format": "T20",
+            "toss_winner": "RR",
+            "toss_choice": "bat",
+            "total_balls": 120,
+            "innings": 1,
+            "innings1_score": null,
+            "target": null,
+            "current_score": 11,
+            "balls": 3,
+            "wickets": 0,
+            "crr": 22.0,
+            "rrr": 0,
+            "history": [
+                {
+                    "runs": 0,
+                    "type": "normal",
+                    "is_wicket": false
+                },
+                {
+                    "runs": 6,
+                    "type": "normal",
+                    "is_wicket": false
+                },
+                {
+                    "runs": 0,
+                    "type": "no_ball",
+                    "is_wicket": false
+                },
+                {
+                    "runs": 4,
+                    "type": "normal",
+                    "is_wicket": false
+                }
+            ],
+            "fours": 1,
+            "sixes": 1,
+            "extras": {
+                "no_balls": 1,
+                "wides": 0,
+                "byes": 0
+            },
+            "result": "Live"
+        }
+    ]
 }

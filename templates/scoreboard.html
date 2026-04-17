@@ -1,26 +1,467 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <title>Live Score</title>
-    <link rel="stylesheet" href="/static/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Live Scoreboard – Pitch-X</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green:  #e83030;
+            --red:    #ff7070;
+            --gold:   #ffc72c;
+            --blue:   #ffaa40;
+            --bg:     #050206;
+            --card:   rgba(255,255,255,0.04);
+            --border: rgba(255,255,255,0.07);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        /* ── ANIMATED BG ── */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+                radial-gradient(ellipse 60% 40% at 20% 10%, rgba(232,44,44,0.09) 0%, transparent 60%),
+                radial-gradient(ellipse 50% 35% at 80% 80%, rgba(255,199,44,0.06) 0%, transparent 55%),
+                radial-gradient(ellipse 40% 30% at 55% 50%, rgba(160,10,10,0.05) 0%, transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 14px 28px;
+            background: rgba(8,12,16,0.85);
+            border-bottom: 1px solid var(--border);
+            backdrop-filter: blur(24px);
+        }
+
+        .brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 1rem; font-weight: 800; letter-spacing: -0.3px;
+        }
+        .brand-icon { font-size: 1.3rem; }
+
+        .live-badge {
+            display: flex; align-items: center; gap: 7px;
+            background: rgba(232,44,44,0.12);
+            border: 1px solid rgba(232,44,44,0.35);
+            color: var(--green);
+            font-size: 0.7rem; font-weight: 800;
+            padding: 5px 14px; border-radius: 50px;
+            letter-spacing: 1.5px; text-transform: uppercase;
+        }
+
+        .pulse-dot {
+            width: 7px; height: 7px; border-radius: 50%;
+            background: var(--green);
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(0,232,135,0.7); }
+            50%      { box-shadow: 0 0 0 8px rgba(0,232,135,0); }
+        }
+
+        .back-btn {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.65);
+            padding: 8px 20px; border-radius: 50px;
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer; text-decoration: none;
+            transition: all 0.2s;
+        }
+        .back-btn:hover { background: rgba(255,255,255,0.12); color: white; transform: translateX(-2px); }
+
+        /* ── MAIN ── */
+        main {
+            position: relative; z-index: 1;
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 40px 20px 80px;
+        }
+
+        /* ── HERO SCORE CARD ── */
+        #board {
+            animation: fadeUp 0.45s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .match-header-card {
+            background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, rgba(255,255,255,0.02) 100%);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 24px;
+            padding: 32px 36px 28px;
+            margin-bottom: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+        .match-header-card::before {
+            content: '🏏';
+            position: absolute; right: 28px; top: 24px;
+            font-size: 5rem; opacity: 0.06;
+            pointer-events: none;
+            transform: rotate(-15deg);
+        }
+
+        .teams-row {
+            display: flex; align-items: center; gap: 16px;
+            margin-bottom: 8px;
+            flex-wrap: wrap;
+        }
+        .team-name {
+            font-size: 1.75rem; font-weight: 900; letter-spacing: -0.5px;
+        }
+        .team-name.batting { color: var(--green); }
+        .vs-chip {
+            background: rgba(255,255,255,0.07);
+            border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.35);
+            font-size: 0.72rem; font-weight: 700;
+            padding: 3px 12px; border-radius: 50px;
+            letter-spacing: 1px; text-transform: uppercase;
+        }
+
+        /* Format + toss pill row */
+        .meta-pills {
+            display: flex; gap: 8px; flex-wrap: wrap;
+            margin-bottom: 28px;
+        }
+        .meta-pill {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.45);
+            font-size: 0.72rem; font-weight: 600;
+            padding: 4px 12px; border-radius: 50px;
+            letter-spacing: 0.5px;
+        }
+        .meta-pill.highlight { color: var(--gold); border-color: rgba(255,199,44,0.2); background: rgba(255,199,44,0.06); }
+
+        /* Hero score display */
+        .hero-score-wrap {
+            display: flex; align-items: flex-end; gap: 20px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .hero-score {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: 5.5rem; line-height: 1;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #ffffff 40%, rgba(255,255,255,0.5));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .hero-target-wrap {
+            padding-bottom: 12px;
+        }
+        .hero-target-label {
+            font-size: 0.68rem; color: rgba(255,255,255,0.35);
+            text-transform: uppercase; letter-spacing: 1px; font-weight: 700;
+            margin-bottom: 2px;
+        }
+        .hero-target-val {
+            font-size: 2rem; font-weight: 900; color: rgba(255,255,255,0.55);
+            letter-spacing: -1px;
+        }
+        .runs-needed-pill {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: rgba(255,90,90,0.12);
+            border: 1px solid rgba(255,90,90,0.25);
+            color: var(--red);
+            font-size: 0.8rem; font-weight: 700;
+            padding: 6px 14px; border-radius: 50px;
+            margin-bottom: 8px;
+        }
+
+        /* ── STAT GRID ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .stat-box {
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 16px;
+            padding: 16px 14px 14px;
+            display: flex; flex-direction: column; gap: 6px;
+            transition: border-color 0.2s, background 0.2s;
+            position: relative; overflow: hidden;
+        }
+        .stat-box:hover {
+            background: rgba(255,255,255,0.07);
+            border-color: rgba(255,255,255,0.13);
+        }
+
+        .stat-box.green-box { border-color: rgba(0,232,135,0.2); background: rgba(0,232,135,0.05); }
+        .stat-box.red-box   { border-color: rgba(255,90,90,0.2);  background: rgba(255,90,90,0.05); }
+        .stat-box.gold-box  { border-color: rgba(255,199,44,0.2); background: rgba(255,199,44,0.05); }
+
+        .stat-label {
+            font-size: 0.62rem; font-weight: 700;
+            color: rgba(255,255,255,0.35);
+            text-transform: uppercase; letter-spacing: 1.2px;
+        }
+        .stat-value {
+            font-size: 1.55rem; font-weight: 900; letter-spacing: -0.5px; line-height: 1.1;
+        }
+        .stat-value.green { color: var(--green); }
+        .stat-value.red   { color: var(--red); }
+        .stat-value.gold  { color: var(--gold); }
+        .stat-value.blue  { color: var(--blue); }
+
+        /* ── EXTRAS ROW ── */
+        .extras-row {
+            display: flex; flex-wrap: wrap; gap: 8px;
+            margin-bottom: 16px;
+        }
+        .extras-chip {
+            display: flex; align-items: center; gap: 6px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.55);
+            font-size: 0.76rem; font-weight: 600;
+            padding: 5px 13px; border-radius: 50px;
+        }
+        .extras-chip b { color: white; font-weight: 800; }
+
+        /* ── STATUS BAR ── */
+        .status-bar {
+            display: flex; align-items: center; justify-content: center; gap: 10px;
+            padding: 14px 20px; border-radius: 14px;
+            font-size: 1rem; font-weight: 800;
+            letter-spacing: 0.3px; margin-top: 6px;
+            transition: all 0.4s;
+        }
+        .status-live {
+            background: rgba(0,232,135,0.08);
+            border: 1px solid rgba(0,232,135,0.22);
+            color: var(--green);
+        }
+        .status-rain {
+            background: rgba(108,176,255,0.08);
+            border: 1px solid rgba(108,176,255,0.22);
+            color: var(--blue);
+        }
+        .status-abandoned {
+            background: rgba(255,90,90,0.08);
+            border: 1px solid rgba(255,90,90,0.22);
+            color: var(--red);
+        }
+        .status-won {
+            background: rgba(255,199,44,0.08);
+            border: 1px solid rgba(255,199,44,0.22);
+            color: var(--gold);
+        }
+
+        /* ── NAV ── */
+        .board-nav {
+            display: flex; gap: 10px; margin-top: 22px; flex-wrap: wrap;
+        }
+        .nav-link {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid rgba(255,255,255,0.09);
+            color: rgba(255,255,255,0.6);
+            padding: 10px 20px; border-radius: 12px;
+            font-size: 0.84rem; font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .nav-link:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* ── SPINNER ── */
+        .spinner-wrap {
+            display: flex; align-items: center; gap: 14px;
+            color: rgba(255,255,255,0.3);
+            padding: 60px 0; justify-content: center;
+        }
+        .spinner {
+            width: 24px; height: 24px;
+            border: 3px solid rgba(255,255,255,0.1);
+            border-top-color: var(--green);
+            border-radius: 50%;
+            animation: spin 0.7s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        @media (max-width: 600px) {
+            .hero-score { font-size: 4rem; }
+            .team-name  { font-size: 1.3rem; }
+            main { padding: 24px 14px 60px; }
+            .match-header-card { padding: 22px 18px; }
+        }
+    </style>
 </head>
 
-<body>
+<body onload="startLiveScoreboard('{{ match_id }}')">
 
-    <div class="container">
+    <header>
+        <div class="brand">
+            <span class="brand-icon">🏏</span>
+            Pitch-X
+        </div>
+        <div class="live-badge">
+            <div class="pulse-dot"></div> Live
+        </div>
+        <a href="/live" class="back-btn">← All Matches</a>
+    </header>
 
-        <h1>🏏 Live Match</h1>
+    <main>
+        <div id="board">
+            <div class="spinner-wrap">
+                <div class="spinner"></div> Loading match…
+            </div>
+        </div>
 
-        <div id="board"></div>
-
-    </div>
+        <div class="board-nav">
+            <a href="/match_details/{{ match_id }}" class="nav-link">📊 Ball-by-Ball</a>
+            <a href="/live" class="nav-link">🏟️ All Matches</a>
+            <a href="/" class="nav-link">🏠 Home</a>
+        </div>
+    </main>
 
     <script src="/static/app.js"></script>
     <script>
-        startLiveScoreboard({{ match_id }});
+        window.startLiveScoreboard = function(id) {
+            async function fetchData() {
+                try {
+                    const res  = await fetch(`/match/${id}`);
+                    const data = await res.json();
+                    const board = document.getElementById('board');
+
+                    if (data.error) {
+                        board.innerHTML = `<div style="color:rgba(255,255,255,0.35);padding:60px 0;text-align:center;font-size:1.1rem">⚠️ Match not found</div>`;
+                        return;
+                    }
+
+                    const overs    = Math.floor(data.balls / 6) + '.' + (data.balls % 6);
+                    const result   = data.result || 'Live';
+                    const wickets  = data.wickets ?? 0;
+                    const extras   = data.extras  || {};
+                    const nb       = extras.no_balls || 0;
+                    const wd       = extras.wides    || 0;
+                    const bye      = extras.byes     || 0;
+                    const nbWdBye  = nb + wd + bye;
+
+                    const isLive      = result === 'Live';
+                    const isRain      = result === 'Rain Delay';
+                    const isAbandoned = result === 'Abandoned';
+                    const isActive    = isLive || isRain || isAbandoned;
+
+                    const statusClass = isLive ? 'status-live' : isRain ? 'status-rain' : isAbandoned ? 'status-abandoned' : 'status-won';
+                    const statusIcon  = isLive ? '🟢' : isRain ? '🌧️' : isAbandoned ? '⛔' : '🏆';
+                    const statusText  = isLive ? 'Live' : isRain ? 'Rain Delay' : isAbandoned ? 'Abandoned' : result;
+
+                    const target        = data.target || null;
+                    const runsNeeded    = target ? Math.max(0, target - data.current_score) : null;
+                    const ballsLeft     = target ? Math.max(0, (data.total_balls || 120) - data.balls) : null;
+                    const oversLeft     = ballsLeft !== null ? Math.floor(ballsLeft/6) + '.' + (ballsLeft%6) : null;
+
+                    /* Extras pills HTML */
+                    let extrasPills = '';
+                    if (nbWdBye > 0) {
+                        if (nb  > 0) extrasPills += `<div class="extras-chip">NB <b>${nb}</b></div>`;
+                        if (wd  > 0) extrasPills += `<div class="extras-chip">Wd <b>${wd}</b></div>`;
+                        if (bye > 0) extrasPills += `<div class="extras-chip">Bye <b>${bye}</b></div>`;
+                    }
+
+                    /* Format / toss pills */
+                    let metaPills = '';
+                    if (data.format)       metaPills += `<span class="meta-pill highlight">${data.format}</span>`;
+                    if (data.toss_winner)  metaPills += `<span class="meta-pill">🪙 ${data.toss_winner} won toss</span>`;
+                    if (data.toss_choice)  metaPills += `<span class="meta-pill">chose to ${data.toss_choice}</span>`;
+
+                    /* Runs-needed badge */
+                    const runsNeededHtml = (runsNeeded !== null && isActive) ? `
+                        <div class="runs-needed-pill">
+                            🎯 ${runsNeeded} runs needed off ${oversLeft} overs
+                        </div>` : '';
+
+                    board.innerHTML = `
+                        <div class="match-header-card">
+                            <div class="teams-row">
+                                <span class="team-name">${data.team1}</span>
+                                <span class="vs-chip">vs</span>
+                                <span class="team-name">${data.team2}</span>
+                            </div>
+
+                            ${metaPills ? `<div class="meta-pills">${metaPills}</div>` : ''}
+
+                            ${runsNeededHtml}
+
+                            <div class="hero-score-wrap">
+                                <div class="hero-score">${data.current_score}/${wickets}</div>
+                                ${target ? `
+                                <div class="hero-target-wrap">
+                                    <div class="hero-target-label">Target</div>
+                                    <div class="hero-target-val">${target}</div>
+                                </div>` : ''}
+                            </div>
+
+                            <div class="stats-grid">
+                                <div class="stat-box">
+                                    <span class="stat-label">Overs</span>
+                                    <span class="stat-value">${overs}</span>
+                                </div>
+                                <div class="stat-box green-box">
+                                    <span class="stat-label">CRR</span>
+                                    <span class="stat-value green">${data.crr}</span>
+                                </div>
+                                <div class="stat-box red-box">
+                                    <span class="stat-label">RRR</span>
+                                    <span class="stat-value red">${isActive ? data.rrr : '—'}</span>
+                                </div>
+                                <div class="stat-box gold-box">
+                                    <span class="stat-label">4s</span>
+                                    <span class="stat-value gold">${data.fours}</span>
+                                </div>
+                                <div class="stat-box gold-box">
+                                    <span class="stat-label">6s</span>
+                                    <span class="stat-value gold">${data.sixes}</span>
+                                </div>
+                                <div class="stat-box">
+                                    <span class="stat-label">Extras</span>
+                                    <span class="stat-value blue">${nbWdBye}</span>
+                                </div>
+                            </div>
+
+                            ${extrasPills ? `<div class="extras-row">${extrasPills}</div>` : ''}
+
+                            <div class="status-bar ${statusClass}">
+                                ${statusIcon} &nbsp; ${statusText}
+                            </div>
+                        </div>
+                    `;
+                } catch (e) {
+                    console.error(e);
+                }
+            }
+
+            fetchData();
+            setInterval(fetchData, 3000);
+        };
     </script>
 
 </body>
-
 </html>

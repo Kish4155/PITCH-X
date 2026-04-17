@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pitch-X – Live Cricket Scoring</title>
+    <meta name="description" content="Pitch-X: Real-time ball-by-ball cricket scoring, live commentary, and match analytics.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Bebas+Neue&display=swap" rel="stylesheet">
+
+    <style>
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        :root {
+            --green:  #e83030;
+            --gold:   #ffc72c;
+            --blue:   #ffaa40;
+            --red:    #ff7070;
+            --bg:     #050206;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            min-height: 100vh;
+            background: var(--bg);
+            color: white;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ── ANIMATED BG ── */
+        body::before {
+            content: '';
+            position: fixed; inset: 0;
+            background:
+                radial-gradient(ellipse 70% 55% at 10% -5%, rgba(232,44,44,0.1) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 45% at 95% 95%, rgba(255,199,44,0.06) 0%, transparent 55%),
+                radial-gradient(ellipse 45% 40% at 55% 50%, rgba(160,10,10,0.05) 0%, transparent 60%);
+            pointer-events: none; z-index: 0;
+        }
+
+        /* ── HEADER ── */
+        header {
+            position: sticky; top: 0; z-index: 100;
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 16px 32px;
+            background: rgba(8,12,16,0.9);
+            border-bottom: 1px solid rgba(255,255,255,0.07);
+            backdrop-filter: blur(24px);
+        }
+        .brand {
+            display: flex; align-items: center; gap: 10px;
+            font-size: 1.25rem; font-weight: 900; letter-spacing: -0.5px;
+        }
+        .brand-x {
+            background: linear-gradient(135deg, var(--green), #b82020);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+        }
+        .admin-corner-link {
+            background: none; border: 1px solid rgba(255,255,255,0.1);
+            color: rgba(255,255,255,0.35); font-size: 0.78rem; font-weight: 600;
+            padding: 7px 16px; border-radius: 50px; text-decoration: none;
+            transition: all 0.2s; letter-spacing: 0.3px;
+        }
+        .admin-corner-link:hover { background: rgba(255,255,255,0.06); color: rgba(255,255,255,0.7); }
+
+        /* ── MAIN ── */
+        main {
+            position: relative; z-index: 1;
+            flex: 1;
+            display: flex; flex-direction: column;
+            align-items: center; justify-content: center;
+            padding: 60px 24px 80px;
+            max-width: 900px; margin: 0 auto; width: 100%;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            text-align: center;
+            animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) both;
+        }
+        @keyframes fadeUp {
+            from { opacity: 0; transform: translateY(28px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+
+        .live-pill {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(232,44,44,0.1);
+            border: 1px solid rgba(232,44,44,0.3);
+            color: var(--green);
+            font-size: 0.72rem; font-weight: 800;
+            padding: 6px 18px; border-radius: 50px;
+            letter-spacing: 1.5px; text-transform: uppercase;
+            margin-bottom: 28px;
+        }
+        .pulse-dot {
+            width: 7px; height: 7px; border-radius: 50%; background: var(--green);
+            animation: pulse 1.4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%,100% { box-shadow: 0 0 0 0 rgba(232,44,44,0.7); }
+            50%      { box-shadow: 0 0 0 9px rgba(232,44,44,0); }
+        }
+
+        .hero-title {
+            font-family: 'Bebas Neue', sans-serif;
+            font-size: clamp(4rem, 12vw, 8rem);
+            letter-spacing: 4px; line-height: 0.95;
+            margin-bottom: 10px;
+        }
+        .hero-title .line1 {
+            background: linear-gradient(135deg, #ffffff 30%, rgba(255,255,255,0.55) 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            display: block;
+        }
+        .hero-title .line2 {
+            background: linear-gradient(135deg, var(--green) 0%, #ffc72c 100%);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+            display: block;
+        }
+
+        .hero-sub {
+            font-size: 1.05rem; color: rgba(255,255,255,0.42);
+            max-width: 460px; margin: 20px auto 44px;
+            line-height: 1.75;
+        }
+
+        /* ── MAIN CTA ── */
+        .cta-group {
+            display: flex; flex-wrap: wrap; gap: 14px;
+            justify-content: center; margin-bottom: 60px;
+        }
+        .btn-primary {
+            display: inline-flex; align-items: center; gap: 10px;
+            background: linear-gradient(135deg, #e83030, #b82020);
+            color: #fff; font-size: 1rem; font-weight: 800;
+            padding: 16px 36px; border-radius: 16px;
+            text-decoration: none; border: none; cursor: pointer;
+            font-family: 'Inter', sans-serif;
+            box-shadow: 0 10px 40px rgba(232,44,44,0.4);
+            transition: all 0.25s;
+            letter-spacing: -0.2px;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 16px 50px rgba(232,44,44,0.55);
+        }
+        .btn-secondary {
+            display: inline-flex; align-items: center; gap: 8px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.12);
+            color: rgba(255,255,255,0.65);
+            font-size: 0.95rem; font-weight: 700;
+            padding: 16px 28px; border-radius: 16px;
+            text-decoration: none; transition: all 0.2s;
+        }
+        .btn-secondary:hover { background: rgba(255,255,255,0.1); color: white; }
+
+        /* ── FEATURE CHIPS ── */
+        .chips {
+            display: flex; flex-wrap: wrap; gap: 9px;
+            justify-content: center;
+            animation: fadeUp 0.7s cubic-bezier(0.22,1,0.36,1) 0.12s both;
+            margin-bottom: 56px;
+        }
+        .chip {
+            display: flex; align-items: center; gap: 7px;
+            background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07);
+            color: rgba(255,255,255,0.38); font-size: 0.78rem; font-weight: 600;
+            padding: 7px 15px; border-radius: 50px;
+        }
+
+        /* ── LIVE MATCH LIST ── */
+        .matches-wrap {
+            max-width: 520px; width: 100%;
+            animation: fadeUp 0.75s cubic-bezier(0.22,1,0.36,1) 0.2s both;
+        }
+        .matches-label {
+            font-size: 0.62rem; font-weight: 700; color: rgba(255,255,255,0.25);
+            text-transform: uppercase; letter-spacing: 1.5px; margin-bottom: 12px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .match-row {
+            display: flex; align-items: center; justify-content: space-between; gap: 12px;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 14px; padding: 13px 18px;
+            margin-bottom: 8px;
+            text-decoration: none; color: white;
+            transition: background 0.2s, border-color 0.2s, transform 0.2s;
+        }
+        .match-row:hover {
+            background: rgba(255,255,255,0.08);
+            border-color: rgba(232,44,44,0.3);
+            transform: translateX(4px);
+        }
+        .mr-teams { font-size: 0.9rem; font-weight: 700; flex: 1; min-width: 0;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .mr-vs { color: rgba(255,255,255,0.28); font-size: 0.75rem; font-weight: 400; }
+        .mr-score { font-size: 0.95rem; font-weight: 900; flex-shrink: 0; }
+        .mr-badge {
+            font-size: 0.6rem; font-weight: 800; padding: 3px 10px;
+            border-radius: 50px; letter-spacing: 1px; text-transform: uppercase;
+            flex-shrink: 0;
+        }
+        .badge-live {
+            background: rgba(232,44,44,0.12); border: 1px solid rgba(232,44,44,0.3);
+            color: var(--green); display: flex; align-items: center; gap: 5px;
+        }
+        .badge-done {
+            background: rgba(255,199,44,0.1); border: 1px solid rgba(255,199,44,0.22);
+            color: var(--gold);
+        }
+        .badge-pd { width: 5px; height: 5px; border-radius: 50%;
+            background: var(--green); animation: pulse 1.4s ease-in-out infinite; }
+        .no-matches {
+            text-align: center; color: rgba(255,255,255,0.2);
+            font-size: 0.85rem; padding: 24px 0;
+        }
+        .no-matches .ni { font-size: 2rem; margin-bottom: 8px; }
+
+        /* ── FOOTER ── */
+        footer {
+            position: relative; z-index: 1;
+            text-align: center; padding: 20px 24px;
+            font-size: 0.72rem; color: rgba(255,255,255,0.15);
+            border-top: 1px solid rgba(255,255,255,0.05);
+        }
+
+        @media (max-width: 600px) {
+            header { padding: 14px 20px; }
+            main   { padding: 40px 18px 60px; }
+            .btn-primary { padding: 14px 28px; font-size: 0.95rem; }
+        }
+    </style>
+</head>
+
+<body>
+    <header>
+        <a href="/" style="text-decoration:none;color:inherit"><div class="brand">Pitch<span class="brand-x">-X</span></div></a>
+        <a href="/login" class="admin-corner-link">🛠 Admin Login</a>
+    </header>
+
+    <main>
+        <div class="hero">
+            <div class="live-pill">
+                <div class="pulse-dot"></div>
+                Live Now
+            </div>
+
+            <h1 class="hero-title">
+                <span class="line1">Pitch</span>
+                <span class="line2">-X</span>
+            </h1>
+
+            <p class="hero-sub">
+                Ball-by-ball updates, live commentary, run rates, and wicket alerts — delivered in real time.
+            </p>
+
+            <div class="cta-group">
+                <a href="/live" class="btn-primary">
+                    📺 Watch Live Scores
+                </a>
+            </div>
+        </div>
+
+        <!-- Feature chips -->
+        <div class="chips">
+            <div class="chip">⚡ Ball-by-ball</div>
+            <div class="chip">📊 CRR &amp; RRR</div>
+            <div class="chip">🏏 Wickets</div>
+            <div class="chip">🌧️ Rain delay</div>
+            <div class="chip">🎙️ Commentary</div>
+            <div class="chip">🏆 T20 &amp; ODI</div>
+            <div class="chip">📱 Mobile ready</div>
+        </div>
+
+        <!-- Live matches list -->
+        <div class="matches-wrap">
+            <div class="matches-label">
+                <div class="badge-pd"></div> Matches
+            </div>
+            <div id="matches-preview">
+                <div class="no-matches"><div class="ni">🏟️</div>Loading matches…</div>
+            </div>
+        </div>
+    </main>
+
+    <footer>© 2025 Pitch-X &nbsp;·&nbsp; Real-time cricket scoring platform</footer>
+
+    <!-- Fixed admin corner link -->
+    <a href="/login" style="
+        position: fixed;
+        bottom: 22px;
+        right: 22px;
+        z-index: 200;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.3);
+        font-size: 0.72rem;
+        font-weight: 600;
+        padding: 7px 14px;
+        border-radius: 50px;
+        text-decoration: none;
+        backdrop-filter: blur(12px);
+        transition: all 0.2s;
+        letter-spacing: 0.3px;
+    " onmouseover="this.style.color='rgba(255,255,255,0.7)';this.style.background='rgba(255,255,255,0.09)'"
+       onmouseout="this.style.color='rgba(255,255,255,0.3)';this.style.background='rgba(255,255,255,0.05)'">
+        🛠 Admin
+    </a>
+    <script>
+        async function loadMatches() {
+            const wrap = document.getElementById('matches-preview');
+            try {
+                const res  = await fetch('/matches');
+                const data = await res.json();
+                const matches = data.matches || [];
+
+                if (!matches.length) {
+                    wrap.innerHTML = '<div class="no-matches"><div class="ni">🏟️</div>No matches yet. Check back soon!</div>';
+                    return;
+                }
+
+                wrap.innerHTML = matches.map(m => {
+                    const isLive  = m.result === 'Live';
+                    const overs   = Math.floor(m.balls / 6) + '.' + (m.balls % 6);
+                    const badge   = isLive
+                        ? `<div class="mr-badge badge-live"><div class="badge-pd"></div> Live</div>`
+                        : `<div class="mr-badge badge-done">✓ ${m.result || 'Done'}</div>`;
+                    const score   = `<span class="mr-score" style="color:${isLive ? 'var(--green)' : 'var(--gold)'}">${m.current_score}/${m.wickets ?? ''} <span style="font-size:0.7rem;font-weight:600;color:rgba(255,255,255,0.35)">(${overs})</span></span>`;
+
+                    return `<a href="/match_details/${m.id}" class="match-row">
+                        <div class="mr-teams">${m.team1} <span class="mr-vs">vs</span> ${m.team2}</div>
+                        ${score}
+                        ${badge}
+                    </a>`;
+                }).join('');
+            } catch(e) {
+                wrap.innerHTML = '<div class="no-matches"><div class="ni">⚠️</div>Could not load matches</div>';
+            }
+        }
+
+        loadMatches();
+        setInterval(loadMatches, 5000);
+    </script>
+</body>
+</html>
